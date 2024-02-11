@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import "./page.css"
 import axios from 'axios';
-const page = () => {
+const Page = () => {
 
   const [username, setUsername] = useState('');
   const [userExists, setUserExists] = useState(null);
@@ -55,4 +55,4 @@ return (
 )
 }
 
-export default page
+export default Page
