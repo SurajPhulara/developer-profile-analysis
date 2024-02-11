@@ -1,4 +1,11 @@
-@tailwind base;
+/* CSS RESET */
+* *{
+  margin: 0;
+  padding: 0;
+}
+
+
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -30,4 +37,4 @@ body {
   .text-balance {
     text-wrap: balance;
   }
-}
+} */
