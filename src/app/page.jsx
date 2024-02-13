@@ -44,7 +44,25 @@ const Page = () => {
         <div className="heading2">
         Analyse and Evaluate your code with the power of AI 
         </div>
-        <div className="box" style={{height:"232px", borderRadius:"20px", background: "rgba(41, 46, 171, 0.11)"}}></div>
+        <div className="box" style={{height:"232px", borderRadius:"20px", background: "rgba(41, 46, 171, 0.11)"}}>
+          <form onSubmit={handleCheckUser}>
+            <div className="grp">
+              <label htmlFor="">Github Username : </label>
+              <input type="text" />
+            </div>
+            <div className="grp">
+              <label htmlFor="">Repository Name : </label>
+              <input type="text" />
+            </div>
+            <div className="grp">
+              <label htmlFor="">Contributer Name : </label>
+              <input type="text" />
+            </div>
+            <div className="grp button3">
+              GO
+            </div>
+          </form>
+        </div>
       </div>
 
 
@@ -86,3 +104,7 @@ const Page = () => {
 }
 
 export default Page
+
+
+
+
