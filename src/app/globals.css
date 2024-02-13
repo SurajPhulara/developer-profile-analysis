@@ -72,7 +72,10 @@ button, a{
 
 .section2{
   margin-left: 85px;
-  margin-right: 100px;
+  margin-right: 85px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 
