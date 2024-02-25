@@ -242,18 +242,21 @@ def display_github_analysis(owner, repo, username, token):
 # print(display_github_analysis(owner, repo, username, token):)
 
 
-if __name__ == "__main__":
+print("hello abc")
+
+# if __name__ == "__main__":
     # If so, extract command-line arguments and call the function
-    owner = "impressico-testing"
-    repo = "test"
-    username= "impressico-testing"
-    token = "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"
+    # owner = "impressico-testing"
+    # repo = "test"
+    # username= "impressico-testing"
+    # token = "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"
 
-    overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
+    # overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
 
-    print(overall_summary)
-    print("_____________")
-    print(analysis_results)
+    # print(overall_summary)
+    # print("_____________")
+    # print(analysis_results)
+    # print("hello abc")
 
     # if len(sys.argv) == 5:
         # username = sys.argv[1]
