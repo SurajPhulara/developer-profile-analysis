@@ -8,9 +8,6 @@ from langchain.prompts import PromptTemplate
 import base64
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
-import json
-
-
 
 load_dotenv()
 
@@ -21,7 +18,7 @@ def fetch_user_changed_files_in_commits(owner, repo, username, token):
 
     headers = {"Authorization": f"token {token}"}
 
-    one_week_ago = (datetime.utcnow() - timedelta(days=14)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    one_week_ago = (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     commits_params = {
         "author": username,
@@ -134,14 +131,13 @@ def generate_developer_performance_analysis(filename, code_content, commit_messa
         4. Provide a rating on a scale of 1 to 5 stars for both code quality and commit message quality, where 1 represents poor performance and 5 represents excellent performance.
         5. Include a detailed summary of the analysis for both aspects, highlighting strengths and areas for improvement.
         6. If there are specific criteria or coding standards to adhere to, mention them in your analysis.
-        7. and most importantly give your output in a standard json format and never include (\n) in your answer.
 
         Input:
         File Name: {filename}
         Code Changes: {code}
         Commit Message: {commit_message}
 
-        Output Structure (in JSON format remember it is important to maintain standard json format without any escape sequences) :
+        Output Structure (in JSON format remember it is important to maintain standard json format like in javascript strictly without any unnecessary punctuation marks and special characters like /\*) dont print "/n" :
         Code Quality Rating: [number of ⭐⭐⭐⭐⭐]
         Commit Message Quality Rating: [number of ⭐⭐⭐⭐⭐]
 
@@ -179,7 +175,7 @@ def generate_pull_request_analysis(user, comment):
     user - {user}
     comment - {comment}
 
-    Output Structure (in JSON format remember it is important to maintain standard json format):
+    Output Structure (in JSON format remember it is important to maintain standard json format like in javascript strictly without unnecessary punctuation marks and special characters like /\*) dont print "/n" :
     Developer Performance Rating: [number of ⭐⭐⭐⭐⭐]
     
 
@@ -196,9 +192,6 @@ def get_summary(doc):
 
 def display_github_analysis(owner, repo, username, token):
     analysis_results = []
-    changed_files_info = fetch_user_changed_files_in_commits(owner, repo, username, token)
-    user_pull_requests = fetch_user_pull_requests(owner, repo, username, token)
-
     changed_files_info = fetch_user_changed_files_in_commits(owner, repo, username, token)
     for commit_info in changed_files_info:
         if commit_info['changed_files']:
@@ -223,7 +216,11 @@ def display_github_analysis(owner, repo, username, token):
 
     all_analyses = []
     for result in analysis_results:
+        result['analysis'] = result['analysis'].replace('\n', '')
+
+    for result in analysis_results:
         all_analyses.append(str(result['analysis']))
+
 
     all_analyses_content = "\n".join(all_analyses)
     doc = Document(page_content=all_analyses_content)
@@ -234,48 +231,43 @@ def display_github_analysis(owner, repo, username, token):
 owner = "impressico-testing"
 repo = "test"
 username= "impressico-testing"
-owner = "surajphulara"
-repo = "routing"
-username= "surajphulara"
-# token = "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"
 token = "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"
 
 # overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
-# overall_summary, analysis_results = display_github_analysis("surajphulara","routing","surajphulara",token)
 
-# print(overall_summary)
-# print("_____________")
-# print(analysis_results.decode('utf-8'))
-
-# print(display_github_analysis(owner, repo, username, token):)
+# print([[overall_summary],[1,2,3,4,5], [analysis_results]])
+# print("_____")
+# print(analysis_results)
+# print("___DONE__")
 
 
-# print("hello abc")
+
+
 
 if __name__ == "__main__":
-    print("hello abc")
-    # If so, extract command-line arguments and call the function
-    owner = "impressico-testing"
-    repo = "test"
-    username= "impressico-testing"
+    # print("hello abc : ")
+#     # If so, extract command-line arguments and call the function
+#     owner = "impressico-testing"
+#     repo = "test"
+#     username= "impressico-testing"
 #     token = "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"
 
-    overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
+#     overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
 
-    # print(overall_summary)
-    # print("_____________")
-    print(analysis_results)
+#     print(overall_summary)
+#     print("_____________")
+#     print(analysis_results)
+#     print("hello abc")
 
-    with open('output.txt', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(analysis_results))
+    # print("reached gg: ",sys.argv)
+    if len(sys.argv) == 4:
+        # print("reached : ",sys.argv)
+        username = sys.argv[1]
+        repository = sys.argv[2]
+        contributor_name = sys.argv[3]
+        # token = sys.argv[4]
+        # result = get_contributor_info(username, repository, contributor_name, token)
+        # overall_summary, analysis_results  = display_github_analysis(username, repository, contributor_name,token)
+        overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
+        print([[overall_summary], [analysis_results]])
 
-    # print("hello abc")
-
-#     # if len(sys.argv) == 5:
-#         # username = sys.argv[1]
-#         # repository = sys.argv[2]
-#         # contributor_name = sys.argv[3]
-#         # token = sys.argv[4]
-#         # # result = get_contributor_info(username, repository, contributor_name, token)
-#         # result = display_github_analysis(username,repository,contributor_name,token)
-#         # print(result)

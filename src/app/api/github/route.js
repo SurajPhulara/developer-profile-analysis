@@ -5,13 +5,20 @@ import util from 'util';
 
 const spawnPromise = util.promisify(spawn);
 
-export async function GET(request, content) {
-    console.log("helllllllllllllllllllllo");
+export async function POST(request, content) {
 
+    console.log("helllllllllllllllllllllo  :  ");
+
+    let x = await request.json()
+    // console.log(x)
+    
+    
     const pythonScriptPath = 'utils.py';
-
+    
     try {
-        const pythonProcess = spawn('python', [pythonScriptPath]);
+        const { usernamee, repo, contributornamee } = x
+        // console.log(usernamee, repo, contributornamee)
+        const pythonProcess = spawn('python', [pythonScriptPath, usernamee, repo, contributornamee]);
         const [stdout, stderr] = await Promise.all([
             new Promise((resolve) => pythonProcess.stdout.on('data', resolve)),
             new Promise((resolve) => pythonProcess.stderr.on('data', resolve)),
@@ -28,7 +35,7 @@ export async function GET(request, content) {
 
         console.log('Python script executed successfully');
         console.log(dataFromPython);
-        return NextResponse.json({ user_exists: true, dataFromPython }, { status: 200 });
+        return NextResponse.json(dataFromPython, { status: 200 });
 
     } catch (error) {
         console.error(`Error executing Python script: ${error.message}`);

@@ -5,6 +5,26 @@ import "./page.css"
 import axios from 'axios';
 const Page = () => {
 
+  const [formData, setFormData] = useState({
+    githubUsername: '',
+    repositoryName: '',
+    contributorName: '',
+  });
+  const [analysis, setAnalysis] = useState({});
+  const [usravatar, setusravatar] = useState({});
+
+
+  const handleChange = (e) => {
+    // const { name, value } = e.target;
+    // // Update the corresponding form value in formData
+    // setFormData((prevData) => ({
+    //   ...prevData,
+    //   [name]: value,
+    // }));
+  };
+
+
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -34,19 +54,89 @@ const Page = () => {
   const [result, setResult] = useState(null);
 
   const handleCheckUser = async (e) => {
-    console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
-    e.preventDefault();
-    const usernamee = 'your_username';
-    try {
-      const response = await axios.get(`/api/github/${usernamee}`);
-      const data = response.data;
-      console.log(data)
 
-      setResult(data);
+    const formData1 = new FormData(e.target);
+    // Access form values from formData
+    const githubUsername = formData1.get('githubUsername');
+    const repositoryName = formData1.get('repositoryName');
+    const contributorName = formData1.get('contributorName');
+
+    setFormData({
+      githubUsername,
+      repositoryName,
+      contributorName,
+    });
+
+
+
+    // console.log("\n new : ", githubUsername, repositoryName, contributorName)
+
+    // console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+    e.preventDefault();
+
+
+
+    const usernamee = githubUsername;
+    const repo = repositoryName;
+    const contributornamee = contributorName;
+
+    try {
+      // Check if user exists
+
+      const userResponse = await axios.get(`https://api.github.com/users/${usernamee}`);
+
+      if (userResponse.status === 200) {
+        // User exists, check repository
+        const repoResponse = await axios.get(`https://api.github.com/repos/${usernamee}/${repo}`);
+        if (repoResponse.status === 200) {
+          // Repository exists, check contributor
+          const contributorsResponse = await axios.get(`https://api.github.com/repos/${usernamee}/${repo}/contributors`);
+          const contributors = contributorsResponse.data;
+
+          const contributorExists = contributors.some(contributor => contributor.login === contributorName);
+
+          if (contributorExists) {
+            console.log("GitHub profile exists with the specified credentials.", userResponse.data.avatar_url);
+            // Continue with your logic if the profile exists
+
+            setusravatar(userResponse.data.avatar_url)
+
+            const response = await axios.post(`/api/github`, { usernamee, repo, contributornamee })
+            const data = response.data;
+            console.log(data)
+            setAnalysis(response?.data)
+
+          } else {
+            console.log("Contributor does not exist in the specified repository.");
+            alert("Contributor not found in the repository. Please check your credentials.");
+          }
+        } else {
+          console.log("Repository does not exist in the specified user's GitHub profile.");
+          alert("Repository not found. Please check your credentials.");
+        }
+      } else {
+        console.log("GitHub user does not exist with the specified credentials.");
+        alert("GitHub user not found. Please check your credentials.");
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error checking GitHub profile:", error);
+      // Handle errors accordingly
     }
+    // try {
+    const response = await axios.post(`/api/github`, { usernamee, repo, contributornamee })
+    const data = response.data;
+    console.log(data)
+
+    //   // setResult(data);
+    // } catch (error) {
+    //   console.error('Error fetching data:', error);
+    // }
   };
+
+  //   async function checkGitHubProfile() {
+
+  // }
+
 
   return (
     <div>
@@ -73,16 +163,16 @@ const Page = () => {
         <div className="box" style={{ borderRadius: "20px", background: "rgba(41, 46, 171, 0.11)" }}>
           <form onSubmit={handleCheckUser}>
             <div className="grp">
-              <label htmlFor="">Github Username : </label>
-              <input type="text" />
+              <label htmlFor="githubUsername">Github Username : </label>
+              <input type="text" id="githubUsername" name="githubUsername"/>
             </div>
             <div className="grp">
-              <label htmlFor="">Repository Name : </label>
-              <input type="text" />
+              <label htmlFor="repositoryName">Repository Name : </label>
+              <input type="text" id="repositoryName" name="repositoryName"/>
             </div>
             <div className="grp">
-              <label htmlFor="">Contributer Name : </label>
-              <input type="text" />
+              <label htmlFor="contributorName">Contributor Name : </label>
+              <input type="text" id="contributorName" name="contributorName"/>
             </div>
             <div className="grp">
               <button type="submit" className="grp button3">
@@ -94,7 +184,7 @@ const Page = () => {
       </div>
 
 
-      
+
 
 
       {/* {result && (
@@ -119,6 +209,22 @@ const Page = () => {
           )}
         </div>
       )} */}
+
+
+
+      <div className="analisys">
+        <div className="profilepic">
+          <img className="profilepicImg" src={usravatar} alt="" />
+          <h2>{formData.githubUsername}</h2>
+        </div>
+        <div className="analysis_result"> 
+          <pre>{JSON.stringify(analysis, null, 2)}</pre>
+        </div>
+      </div>
+
+
+
+
     </div>
   )
 }

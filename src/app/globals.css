@@ -185,6 +185,62 @@ button, a{
 
 
 
+.analisys{
+  /* border: 2px solid red; */
+  height: 100%;
+  width: 85%;
+  min-height: 50vh;
+  max-width: 95vw;
+  margin: 0 auto;
+  margin-top: 100px;
+}
+
+
+.profilepic{
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.profilepic .profilepicImg{
+  height: 100px;
+  border-radius: 50%;
+  /* overflow: hidden; */
+  border: 2ps solid black;
+  float: left;
+}
+
+
+.analysis_result{
+  width: 100%;
+  font-size: 24px;
+  /* border: 2px solid red; */
+  display: flex;
+  flex-wrap: wrap;
+  text-align: inherit;
+  height: fit-content;
+  word-wrap: break-word;
+  margin-top: 50px;
+}
+
+.analysis_result pre {
+  white-space: pre-wrap; /* Wrap long lines without adding extra spaces */
+  overflow-wrap: break-word; /* Allow breaking words at appropriate points */
+  max-width: 100%; /* Optional maximum width to prevent excessive horizontal overflow */
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @media screen and (min-width: 800px) {
