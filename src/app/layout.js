@@ -11,6 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <script src="https://cdn.tailwindcss.com"></script>
       <body className={inter.className}>{children}</body>
     </html>
   );
