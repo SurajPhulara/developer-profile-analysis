@@ -7,9 +7,10 @@ from langchain.docstore.document import Document
 from langchain.prompts import PromptTemplate
 import base64
 import sys
+import time
 sys.stdout.reconfigure(encoding='utf-8')
-
 load_dotenv()
+import json
 
 def fetch_user_changed_files_in_commits(owner, repo, username, token):
     # print(f"Fetching changed files for {username} in {owner}/{repo}")
@@ -25,10 +26,13 @@ def fetch_user_changed_files_in_commits(owner, repo, username, token):
         "since": one_week_ago,
     }
 
+    # print(commits_url)
+
     commits_response = requests.get(commits_url, headers=headers, params=commits_params)
     commits_response.raise_for_status()
 
     commits_data = commits_response.json()
+
 
     user_changed_files = []
 
@@ -137,23 +141,45 @@ def generate_developer_performance_analysis(filename, code_content, commit_messa
         Code Changes: {code}
         Commit Message: {commit_message}
 
-        Output Structure (in JSON format remember it is important to maintain standard json format like in javascript strictly without any unnecessary punctuation marks and special characters like /\*) dont print "/n" :
-        Code Quality Rating: [number of ⭐⭐⭐⭐⭐]
-        Commit Message Quality Rating: [number of ⭐⭐⭐⭐⭐]
+        Example Output Structure:
+        {{
+            "Code Quality Rating": "⭐⭐⭐",
+            "Commit Message Quality Rating": "⭐⭐⭐",
+            "Summary": "",
+            "Code Quality Strengths": [
+                "Adherence to coding standards: The code follows basic coding conventions, such as proper indentation, variable naming, and syntax.",
+                "Maintainability: The code is generally organized in a modular manner, making it easier to understand and maintain."
+            ],
+            "Areas for Improvement in Code Quality": [
+                "Efficiency: The code lacks optimizations and could benefit from refactoring to improve performance.",
+                "Error handling: The code doesn't include proper error handling mechanisms, which could lead to unexpected behavior.",
+                "Unit testing: There is no evidence of unit tests to ensure code correctness."
+            ],
+            "Commit Message Clarity": [
+                "The commit message is concise and provides a brief overview of the changes made."
+            ],
+            "Areas for Improvement in Commit Messages": [
+                "Lack of context: The commit message doesn't provide any context or rationale for the changes made, making it difficult to understand the purpose behind the changes.",
+                "Missing details: The commit message doesn't include specifics about the changes, such as which files were modified or what specific code improvements were made."
+            ],
+            "Recommendations": {{
+                "Code Quality": [
+                    "Incorporate performance optimizations to enhance code efficiency.",
+                    "Implement proper error handling mechanisms to address potential issues.",
+                    "Add unit tests to ensure code functionality and reliability."
+                ],
+                "Commit Messages": [
+                    "Provide context and rationale for the changes made, explaining the motivation behind the modifications.",
+                    "Include specific details about the changes, such as files modified and code improvements implemented.",
+                    "Adhere to a consistent commit message format to improve readability and understanding."
+                ]
+            }},
+            "By addressing these areas for improvement, the developer can enhance the overall code quality, ensuring maintainability, efficiency, and reliability. Additionally, providing clear and detailed commit messages will facilitate better communication and understanding among team members.": ""
+        }}
 
-        Summary:
-        - Code Quality Strengths: [Identify strong points]
-        - Areas for Improvement in Code Quality: [Highlight areas that need improvement]
-        - Commit Message Clarity: [Evaluate how well the commit message conveys changes]
-        - Areas for Improvement in Commit Messages: [Highlight areas that need improvement]
-
-        Recommendations:
-        - Suggest specific actions to enhance code quality.
-        - Provide guidance on writing clear and informative commit messages.
-        - Offer advice on adopting best practices.
 
         Note: The ratings should reflect the overall code quality and commit message quality, and the summary should offer constructive feedback for improvement.
-        Special note: Please do not include or print any code file or code in the output.
+        Special note: Please do not include or print any code file or code in the output. ALso don't alter o/p keys
         """
     # star_template = PromptTemplate(template=prompt, input_variables=['filename', 'code_content', 'commit_message'])
     prompt = prompt.format(code=code_content, filename=filename, commit_message=commit_message)
@@ -167,7 +193,7 @@ def generate_pull_request_analysis(user, comment):
 
     Do an analysis on {user}'s {comment} on an repository and give him an rating from 1-5 based on the comments on Pull request.
     
-    1. Positive comments : like +1, bravo, nice,this code looks very good etc.
+    1. Positive comments: like +1, bravo, nice, this code looks very good, etc.
     2. Code suggestions in comments: Some alternate implementation of current code, this should be considered as neutral.
     3. Change Request: This could be considered as negative or if reviewer says there is a change in requirement then neutral.
 
@@ -175,8 +201,10 @@ def generate_pull_request_analysis(user, comment):
     user - {user}
     comment - {comment}
 
-    Output Structure (in JSON format remember it is important to maintain standard json format like in javascript strictly without unnecessary punctuation marks and special characters like /\*) dont print "/n" :
-    Developer Performance Rating: [number of ⭐⭐⭐⭐⭐]
+    Output Structure example:-
+    {{  
+        "Developer Comment Rating": "⭐⭐⭐⭐⭐",
+    }}
     
 
     Note: The rating should reflect the overall comment quality.
@@ -184,6 +212,8 @@ def generate_pull_request_analysis(user, comment):
     prompt = prompt.format(user=user, comment=comment)
     response = llm_g.invoke(prompt)
     return response.content
+
+
 def get_summary(doc):
     llm_g = ChatGoogleGenerativeAI(model="gemini-pro")
     chain = load_summarize_chain(llm_g, chain_type="stuff")
@@ -193,10 +223,12 @@ def get_summary(doc):
 def display_github_analysis(owner, repo, username, token):
     analysis_results = []
     changed_files_info = fetch_user_changed_files_in_commits(owner, repo, username, token)
+    # print(changed_files_info)
     for commit_info in changed_files_info:
         if commit_info['changed_files']:
             for file_info in commit_info['changed_files']:
                 commit_analysis = generate_developer_performance_analysis(file_info['path'], file_info['patch'], commit_info['message'])
+                time.sleep(10)
                 analysis_results.append({
                     'type': 'commit',
                     'sha': commit_info['sha'],
@@ -205,9 +237,11 @@ def display_github_analysis(owner, repo, username, token):
 
     # Analyze pull requests
     user_pull_requests = fetch_user_pull_requests(owner, repo, username, token)
+    # print(user_pull_requests)
     for pull_request in user_pull_requests:
         for comment in pull_request['comments']:
             pr_analysis = generate_pull_request_analysis(comment['user'], comment['body'])
+            time.sleep(5)
             analysis_results.append({
                 'type': 'pull_request',
                 'number': pull_request['number'],
@@ -230,44 +264,51 @@ def display_github_analysis(owner, repo, username, token):
 
 owner = "impressico-testing"
 repo = "test"
-username= "impressico-testing"
-token = "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"
+username= "shubham-309"
+token = "xyz"
 
 # overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
 
-# print([[overall_summary],[1,2,3,4,5], [analysis_results]])
+# print(overall_summary)
 # print("_____")
 # print(analysis_results)
-# print("___DONE__")
 
+
+# for i in range(15):
+#     print(i)
+#     time.sleep(1)
+
+# print("---------------------done ----------------------------------")
 
 
 
 
 if __name__ == "__main__":
-    # print("hello abc : ")
-#     # If so, extract command-line arguments and call the function
-#     owner = "impressico-testing"
-#     repo = "test"
-#     username= "impressico-testing"
-#     token = "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"
+# # #     # If so, extract command-line arguments and call the function
+# # #     owner = "impressico-testing"
+# # #     repo = "test"
+# # #     username= "impressico-testing"
+# # #     token = "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"
 
-#     overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
+# # #     overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
 
-#     print(overall_summary)
-#     print("_____________")
-#     print(analysis_results)
-#     print("hello abc")
+# # #     print(overall_summary)
+# # #     print("_____________")
+# # #     print(analysis_results)
+# # #     print("hello abc")
 
-    # print("reached gg: ",sys.argv)
+#     # print(len(sys.argv),"  reached gg: ",sys.argv)
+
     if len(sys.argv) == 4:
-        # print("reached : ",sys.argv)
+#         print("hello abc : ")
+#         # print("reached : ",sys.argv)
         username = sys.argv[1]
         repository = sys.argv[2]
         contributor_name = sys.argv[3]
-        # token = sys.argv[4]
-        # result = get_contributor_info(username, repository, contributor_name, token)
-        # overall_summary, analysis_results  = display_github_analysis(username, repository, contributor_name,token)
-        overall_summary, analysis_results = display_github_analysis(owner,repo,username,token)
-        print([[overall_summary], [analysis_results]])
+#         print("  hhh    ", username, repository, contributor_name,)
+#         # result = get_contributor_info(username, repository, contributor_name, token)
+        overall_summary, analysis_results = display_github_analysis(username, repository, contributor_name,token)
+        print(analysis_results)
+#         print("done")
+
 
