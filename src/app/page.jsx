@@ -96,28 +96,28 @@ const Page = () => {
           const contributorExists = contributors.some(contributor => contributor.login === contributorName);
 
           if (contributorExists) {
-            console.log("GitHub profile exists with the specified credentials.", userResponse.data.avatar_url);
+            // console.log("GitHub profile exists with the specified credentials.", userResponse.data.avatar_url);
             // Continue with your logic if the profile exists
 
             setusravatar(userResponse.data.avatar_url)
 
             const response = await axios.post(`/api/github`, { usernamee, repo, contributornamee })
-            console.log("data received")
+            // console.log("data received")
             const data = response.data;
-            console.log(data)
-            console.log("Data Type:", typeof data);
+            // console.log(data)
+            // console.log("Data Type:", typeof data);
             setAnalysis(response?.data)
 
           } else {
-            console.log("Contributor does not exist in the specified repository.");
+            // console.log("Contributor does not exist in the specified repository.");
             alert("Contributor not found in the repository. Please check your credentials.");
           }
         } else {
-          console.log("Repository does not exist in the specified user's GitHub profile.");
+          // console.log("Repository does not exist in the specified user's GitHub profile.");
           alert("Repository not found. Please check your credentials.");
         }
       } else {
-        console.log("GitHub user does not exist with the specified credentials.");
+        // console.log("GitHub user does not exist with the specified credentials.");
         alert("GitHub user not found. Please check your credentials.");
       }
     } catch (error) {
@@ -262,7 +262,7 @@ const GitHubAnalysis = ({ data }) => {
   // const parsedData = JSON.parse(data);
   // console.log("mmmmmmmmmmm    :    ")
   // data = JSON.parse(data)
-  console.log(typeof data);
+  // console.log(typeof data);
   // console.log(data);
   // console.log("ggggg  :  ",JSON.parse(JSON.stringify(data, null, 2)))
 

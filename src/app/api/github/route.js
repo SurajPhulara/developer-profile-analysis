@@ -7,8 +7,6 @@ const spawnPromise = util.promisify(spawn);
 
 export async function POST(request, content) {
 
-    console.log("helllllllllllllllllllllo  :  ");
-
     const abc = [
         {
             "type": "commit",
